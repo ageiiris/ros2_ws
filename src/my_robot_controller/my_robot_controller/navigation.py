@@ -56,13 +56,11 @@ class TurtleNavigationNode(Node):
       
       
        # Initialize goal poses as dictionaries {x, y, w}
-       self.x_home = -2.0
-       self.y_home = -0.5
+
       
-       self.goal_poses.append({'x': 1.5, 'y': -1.0, 'yaw': -30})
-       self.goal_poses.append({'x': 2.5, 'y': 2.0, 'yaw': 60.0})
-       self.goal_poses.append({'x': 2.50, 'y': -1.0, 'yaw': 40.0})
-       self.goal_poses.append({'x': 1.50, 'y': 2.0, 'yaw': 0.0})
+       self.goal_poses.append({'x': -3.99, 'y': -1.17, 'yaw': -30.0})
+       self.goal_poses.append({'x': -6.0, 'y': -3.38, 'yaw': 60.0})
+       self.goal_poses.append({'x': -9.48, 'y': -0.58, 'yaw': 40.0})
       
       
        time.sleep(5)
@@ -74,8 +72,8 @@ class TurtleNavigationNode(Node):
        # Check if current goal pose is reached
        current_pose = msg.pose.pose
        goal_pose = self.goal_poses[self.current_goal_index]
-       distance_to_goal = (((current_pose.position.x - self.x_home) - goal_pose['x']) ** 2 +
-                           ((current_pose.position.y - self.y_home) - goal_pose['y']) ** 2) ** 0.5
+       distance_to_goal = (((current_pose.position.x) - goal_pose['x']) ** 2 +
+                           ((current_pose.position.y) - goal_pose['y']) ** 2) ** 0.5
        if distance_to_goal < 0.3:  # You can adjust this threshold
            print(distance_to_goal)
            self.publish_next_goal()

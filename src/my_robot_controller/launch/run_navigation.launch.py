@@ -15,17 +15,20 @@ from ament_index_python.packages import get_package_share_directory
 def generate_launch_description():
 
 
-    pkg_turtlebot3_gazebo = get_package_share_directory('turtlebot3_gazebo')
+    pkg_my_robot_controller = get_package_share_directory('my_robot_controller')
     pkg_turtlebot3_nav2 = get_package_share_directory('turtlebot3_navigation2')
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     map_dir = os.path.join(
         get_package_share_directory('my_robot_controller'),
         'maps',
-        'map.yaml'
+        'map_final.yaml'
     )
+
+
+
     gazebo_world = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-                os.path.join(pkg_turtlebot3_gazebo, 'launch', 'av_cource.launch.py')
+                os.path.join(pkg_my_robot_controller, 'launch', 'av_cource.launch.py')
         )
     )
 
@@ -34,7 +37,8 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
                 os.path.join(pkg_turtlebot3_nav2, 'launch', 'navigation2.launch.py')
         ),
-        launch_arguments={'use_sim_time': use_sim_time, 'map': map_dir}.items()
+        launch_arguments={'use_sim_time': use_sim_time,
+                          'map': map_dir}.items()
     )
 
 
