@@ -9,9 +9,12 @@ import tf_transformations
 import time
 import math
 
+from tier4_system_msgs.srv import ChangeOperationMode
 
 
-class TurtleNavigationNode(Node):
+
+
+class CarNavigationNode(Node):
   
    def __init__(self):
        super().__init__("navigation")
@@ -23,22 +26,25 @@ class TurtleNavigationNode(Node):
            PoseWithCovarianceStamped, "/initialpose", 10)
       
        self.goal_pose_publisher = self.create_publisher(
-           PoseStamped, "/goal_pose", 10)
+           PoseStamped, "/planning/mission_planning/goal", 10)
       
        self.odom_listener = self.create_subscription(
-           Odometry, "/odom", self.odom_callback, 10)
+           Odometry, "/localization/kinematic_state", self.odom_callback, 10)
+       
+       self.change_mode_srv = self.create_client(ChangeOperationMode, '/system/operation_mode/change_operation_mode')
+       self.change_mode_req = ChangeOperationMode.Request()
       
        ############# [Initial Location] ############
        initial_pose = PoseWithCovarianceStamped()
        initial_pose.header.frame_id = 'map'
-       initial_pose.pose.pose.position.x = 0.0
-       initial_pose.pose.pose.position.y = 0.0
+       initial_pose.pose.pose.position.x = 3755.20
+       initial_pose.pose.pose.position.y = 73758.77
               
-       qq = tf_transformations.quaternion_from_euler(0,0,0)# x, y, z or Roll Pitch Yaw
-       initial_pose.pose.pose.orientation.x = qq[0]
-       initial_pose.pose.pose.orientation.y = qq[1]
-       initial_pose.pose.pose.orientation.z = qq[2]
-       initial_pose.pose.pose.orientation.w = qq[3]
+       initial_pose.pose.pose.orientation.x = 0.0
+       initial_pose.pose.pose.orientation.y = 0.0
+       initial_pose.pose.pose.orientation.z = 0.85
+       initial_pose.pose.pose.orientation.w = 0.51
+       time.sleep(5)
        self.initial_pose_publisher.publish(initial_pose)
        #################################
        # time.sleep(1)
@@ -59,10 +65,8 @@ class TurtleNavigationNode(Node):
        self.x_home = -2.0
        self.y_home = -0.5
       
-       self.goal_poses.append({'x': 1.5, 'y': -1.0, 'yaw': -30})
-       self.goal_poses.append({'x': 2.5, 'y': 2.0, 'yaw': 60.0})
-       self.goal_poses.append({'x': 2.50, 'y': -1.0, 'yaw': 40.0})
-       self.goal_poses.append({'x': 1.50, 'y': 2.0, 'yaw': 0.0})
+       self.goal_poses.append({'x': 3838.15673828125, 'y': 73754.28125, 'xx': 0.0, 'yy': 0.0, 'zz': 0.8594731333757634, 'w': 0.5111809200324747})
+      
       
       
        time.sleep(5)
@@ -74,8 +78,8 @@ class TurtleNavigationNode(Node):
        # Check if current goal pose is reached
        current_pose = msg.pose.pose
        goal_pose = self.goal_poses[self.current_goal_index]
-       distance_to_goal = (((current_pose.position.x - self.x_home) - goal_pose['x']) ** 2 +
-                           ((current_pose.position.y - self.y_home) - goal_pose['y']) ** 2) ** 0.5
+       distance_to_goal = (((current_pose.position.x) - goal_pose['x']) ** 2 +
+                           ((current_pose.position.y) - goal_pose['y']) ** 2) ** 0.5
        if distance_to_goal < 0.3:  # You can adjust this threshold
            print(distance_to_goal)
            self.publish_next_goal()
@@ -90,20 +94,26 @@ class TurtleNavigationNode(Node):
            self.get_logger().info("All goals explored!")
            self.stop()
 
+   def send_request(self):
+       self.change_mode_req.mode = 2 
+       self.change_mode_srv.call_async(self.change_mode_req)
 
    def publish_goal(self):
            pose_msg = PoseStamped()
            pose_msg.pose.position.x = self.goal_poses[self.current_goal_index]['x']
            pose_msg.pose.position.y = self.goal_poses[self.current_goal_index]['y']
-           yaw_angle = self.goal_poses[self.current_goal_index]['yaw']* math.pi/180
-           qq = tf_transformations.quaternion_from_euler(0,0,yaw_angle)# x, y, z or Roll Pitch Yaw
-           pose_msg.pose.orientation.x = qq[0]
-           pose_msg.pose.orientation.y = qq[1]
-           pose_msg.pose.orientation.z = qq[2]
-           pose_msg.pose.orientation.w = qq[3]
+           
+           #qq = tf_transformations.quaternion_from_euler(0,0,yaw_angle)# x, y, z or Roll Pitch Yaw
+           pose_msg.pose.orientation.x = self.goal_poses[self.current_goal_index]['xx']
+           pose_msg.pose.orientation.y = self.goal_poses[self.current_goal_index]['yy']
+           pose_msg.pose.orientation.z = self.goal_poses[self.current_goal_index]['zz']
+           pose_msg.pose.orientation.w = self.goal_poses[self.current_goal_index]['w']
            pose_msg.header.frame_id = 'map'
            self.goal_pose_publisher.publish(pose_msg)
            self.get_logger().info("Published goal: {}".format(self.current_goal_index))
+
+           time.sleep(3)
+           self.send_request()
 
 
    def stop(self):
@@ -118,7 +128,7 @@ class TurtleNavigationNode(Node):
 
 def main(args=None):
    rclpy.init(args=args)
-   node = TurtleNavigationNode()
+   node = CarNavigationNode()
 
 
    try:
