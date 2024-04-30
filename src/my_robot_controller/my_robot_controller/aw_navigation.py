@@ -64,10 +64,11 @@ class CarNavigationNode(Node):
        # Initialize goal poses as dictionaries {x, y, w}
        self.x_home = -2.0
        self.y_home = -0.5
-      
+
+       self.goal_poses.append({'x': 3715.54, 'y': 73696.84, 'xx': 0.0, 'yy': 0.0, 'zz':  -0.53, 'w': 0.85})
        self.goal_poses.append({'x': 3838.15673828125, 'y': 73754.28125, 'xx': 0.0, 'yy': 0.0, 'zz': 0.8594731333757634, 'w': 0.5111809200324747})
-       #self.goal_poses.append({'x': 3838.15673828125, 'y': 73754.28125, 'xx': 0.0, 'yy': 0.0, 'zz': 0.8594731333757634, 'w': 0.5111809200324747})
-       #self.goal_poses.append({'x': 3838.15673828125, 'y': 73754.28125, 'xx': 0.0, 'yy': 0.0, 'zz': 0.8594731333757634, 'w': 0.5111809200324747})
+       self.goal_poses.append({'x': 3790.21, 'y': 73805.57, 'xx': 0.0, 'yy': 0.0, 'zz': -0.97, 'w': 0.24})
+      
 
        time.sleep(5)
        self.publish_goal()
